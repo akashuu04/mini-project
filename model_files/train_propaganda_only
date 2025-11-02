@@ -1,0 +1,47 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+import joblib
+
+# ----------------------------
+# Load datasets
+# ----------------------------
+base_path = "datasets/fake-and-real-news-dataset"
+
+fake_df = pd.read_csv(f"{base_path}/Fake.csv")
+true_df = pd.read_csv(f"{base_path}/True.csv")
+propaganda_df = pd.read_csv(f"{base_path}/z.csv")
+
+# ----------------------------
+# Prepare dataset for propaganda detection
+# ----------------------------
+fake_df['label'] = 'not_propaganda'
+true_df['label'] = 'not_propaganda'
+propaganda_df['label'] = 'propaganda'
+
+prop_df = pd.concat([fake_df, true_df, propaganda_df], ignore_index=True)
+prop_df = prop_df[['text', 'label']]
+
+# Encode labels
+prop_df['label_enc'] = prop_df['label'].map({'not_propaganda':0, 'propaganda':1})
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    prop_df['text'], prop_df['label_enc'], test_size=0.2, random_state=42, stratify=prop_df['label_enc']
+)
+
+# TF-IDF vectorization
+vectorizer_prop = TfidfVectorizer(max_features=5000)
+X_train_vec = vectorizer_prop.fit_transform(X_train)
+X_test_vec = vectorizer_prop.transform(X_test)
+
+# Train Naive Bayes model
+model_prop = MultinomialNB()
+model_prop.fit(X_train_vec, y_train)
+
+# Save model and vectorizer
+joblib.dump(model_prop, "propaganda_model.pkl")
+joblib.dump(vectorizer_prop, "propaganda_vectorizer.pkl")
+
+print("Propaganda model and vectorizer saved successfully!")
