@@ -70,9 +70,9 @@ if st.button("Analyze"):
                 st.write("- " + item)
 
         # ----------------------------
-        # AI Explanation (Professional 4-5 sentence)
+        # Explanation (Professional 4-5 sentence)
         # ----------------------------
-        st.subheader("AI Explanation (Why Fake/Real):")
+        st.subheader("Explanation (Why Fake/Real):")
         explanation = fake_real_explanation(
             article_text, fake_real_model, vectorizer, label_encoder,
             url=url_input, author=author_input, date=date_input
